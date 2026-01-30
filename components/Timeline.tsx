@@ -19,31 +19,31 @@ export default function Timeline({ stats, autoPlay = false }: TimelineProps) {
       setVisibleItems(0);
       const interval = setInterval(() => {
         setVisibleItems((prev) => {
-          if (prev >= Math.min(dates.length, 20)) {
+          if (prev >= Math.min(dates.length, 50)) {
             clearInterval(interval);
             return prev;
           }
           return prev + 1;
         });
-      }, 100);
+      }, 80);
       return () => clearInterval(interval);
     } else {
-      setVisibleItems(Math.min(dates.length, 20));
+      setVisibleItems(Math.min(dates.length, 50));
     }
   }, [autoPlay, dates.length]);
 
-  const displayedDates = dates.slice(0, 20);
+  const displayedDates = dates.slice(0, 50);
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4">
+    <div className="w-full max-w-2xl mx-auto">
       <motion.h3
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-3xl md:text-4xl font-bold mb-8 text-center gradient-text"
+        className="text-2xl md:text-3xl font-bold mb-6 text-center gradient-text"
       >
         Timeline des commits
       </motion.h3>
-      <div className="space-y-3">
+      <div className="space-y-2">
         {displayedDates.map((date, index) => {
           const count = stats.commitFrequency[date];
           const width = maxCommits > 0 ? (count / maxCommits) * 100 : 0;
@@ -62,17 +62,14 @@ export default function Timeline({ stats, autoPlay = false }: TimelineProps) {
                 duration: 0.5,
                 ease: 'easeOut',
               }}
-              className="flex items-center gap-4 group"
+              className="flex items-center gap-3 group shrink-0"
             >
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: isVisible ? 1 : 0 }}
-                transition={{ delay: index * 0.08 + 0.2 }}
-                className="text-sm md:text-base text-gray-400 w-28 md:w-32 font-mono"
+              <span
+                className="text-xs md:text-sm text-gray-400 font-mono shrink-0 min-w-[100px] md:min-w-[110px]"
               >
                 {date}
-              </motion.span>
-              <div className="flex-1 bg-gray-800/50 rounded-full h-8 md:h-10 overflow-hidden relative">
+              </span>
+              <div className="flex-1 min-w-0 bg-gray-800/50 rounded-full h-6 md:h-8 overflow-hidden relative">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: isVisible ? `${width}%` : 0 }}
@@ -123,14 +120,14 @@ export default function Timeline({ stats, autoPlay = false }: TimelineProps) {
         })}
       </div>
       
-      {dates.length > 20 && (
+      {dates.length > 50 && (
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.5 }}
-          className="text-center text-gray-500 text-sm mt-6"
+          className="text-center text-gray-500 text-sm mt-4"
         >
-          ... et {dates.length - 20} autres jours
+          ... et {dates.length - 50} autres jours (défile pour voir)
         </motion.p>
       )}
     </div>

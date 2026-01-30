@@ -27,6 +27,9 @@ yarn-error.log*
 # local env files
 .env*.local
 
+# MCP config (contient le token GitHub)
+.cursor/mcp.json
+
 # vercel
 .vercel
 

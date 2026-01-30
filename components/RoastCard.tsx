@@ -5,9 +5,10 @@ import { RoastResult } from '@/lib/roastEngine';
 
 interface RoastCardProps {
   roast: RoastResult;
+  repoName?: string | null;
 }
 
-export default function RoastCard({ roast }: RoastCardProps) {
+export default function RoastCard({ roast, repoName }: RoastCardProps) {
   const severityColors = {
     soft: 'from-green-500 to-emerald-600',
     medium: 'from-yellow-500 to-orange-600',
@@ -22,6 +23,16 @@ export default function RoastCard({ roast }: RoastCardProps) {
       className="glass rounded-3xl p-8 md:p-12 max-w-4xl mx-auto"
     >
       <div className={`bg-gradient-to-br ${severityColors[roast.severity]} rounded-2xl p-8 text-center`}>
+        {repoName && (
+          <motion.p
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            className="text-lg md:text-xl text-white/80 font-mono mb-4"
+          >
+            {repoName}
+          </motion.p>
+        )}
         <motion.h2
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
