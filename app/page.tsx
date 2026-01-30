@@ -42,7 +42,7 @@ export default function Home() {
 
       // Rediriger avec le git log
       const encoded = encodeURIComponent(data.gitLog);
-      router.push(`/wrapped?log=${encoded}&repo=${encodeURIComponent(data.repo)}`);
+      router.push(`/review?log=${encoded}&repo=${encodeURIComponent(data.repo)}`);
     } catch (err) {
       setError('Erreur de connexion');
       setLoading(false);
@@ -65,7 +65,7 @@ export default function Home() {
     }
 
     const encoded = encodeURIComponent(gitLog.trim());
-    router.push(`/wrapped?log=${encoded}`);
+    router.push(`/review?log=${encoded}`);
   };
 
   return (
@@ -89,7 +89,7 @@ export default function Home() {
             transition={{ delay: 0.2, type: 'spring' }}
             className="text-7xl md:text-9xl font-bold mb-4 gradient-text"
           >
-            Code Roast
+            Project
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
@@ -97,7 +97,7 @@ export default function Home() {
             transition={{ delay: 0.4 }}
             className="text-3xl md:text-5xl text-gray-300 mb-2 font-light"
           >
-            Wrapped
+            Analytics
           </motion.p>
           <motion.p
             initial={{ opacity: 0 }}
@@ -105,7 +105,7 @@ export default function Home() {
             transition={{ delay: 0.6 }}
             className="text-gray-400 mt-6 text-lg"
           >
-            Découvre ton roast personnalisé basé sur tes commits Git
+            Analyse complète et détaillée de l'historique de ton projet
           </motion.p>
         </div>
 
@@ -116,11 +116,10 @@ export default function Home() {
               setInputMode('github');
               setError('');
             }}
-            className={`px-6 py-3 rounded-xl font-medium transition-all ${
-              inputMode === 'github'
+            className={`px-6 py-3 rounded-xl font-medium transition-all ${inputMode === 'github'
                 ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
                 : 'glass text-gray-400 hover:text-white'
-            }`}
+              }`}
           >
             🔗 URL GitHub
           </button>
@@ -129,11 +128,10 @@ export default function Home() {
               setInputMode('manual');
               setError('');
             }}
-            className={`px-6 py-3 rounded-xl font-medium transition-all ${
-              inputMode === 'manual'
+            className={`px-6 py-3 rounded-xl font-medium transition-all ${inputMode === 'manual'
                 ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
                 : 'glass text-gray-400 hover:text-white'
-            }`}
+              }`}
           >
             📝 Git Log
           </button>
@@ -179,11 +177,11 @@ export default function Home() {
                   setGitLog(e.target.value);
                   setError('');
                 }}
-                placeholder="Colle ici le résultat de: git log --oneline --date=short"
+                placeholder='Colle ici le résultat de: git log --all --pretty=format:"%H|%an|%ae|%ad|%s" --date=iso'
                 className="w-full h-48 bg-gray-900/50 border border-gray-700 rounded-xl p-4 text-gray-100 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none transition-all"
               />
               <p className="mt-3 text-xs text-gray-500">
-                Format: <code className="bg-gray-800 px-2 py-1 rounded">hash date message</code> (une ligne par commit)
+                Format recommandé : <code className="bg-gray-800 px-2 py-1 rounded">hash|author|email|date|message</code>
               </p>
             </div>
           )}
@@ -216,7 +214,7 @@ export default function Home() {
               </>
             ) : (
               <>
-                Roast My Code 🔥
+                Analyser le Projet 🚀
               </>
             )}
           </motion.button>
@@ -231,11 +229,11 @@ export default function Home() {
           >
             <button
               onClick={() => {
-                const example = `a1b2c3d 2024-01-15 fix bug
-e4f5g6h 2024-01-15 add feature
-i7j8k9l 2024-01-16 update readme
-m1n2o3p 2024-01-16 fix typo
-q4r5s6t 2024-01-17 refactor code`;
+                const example = `a1b2c3d|John Doe|john@example.com|2024-01-15 10:30:00 +0100|Initial commit
+e4f5g6h|Jane Smith|jane@example.com|2024-01-15 14:20:00 +0100|Add feature
+i7j8k9l|John Doe|john@example.com|2024-01-16 09:15:00 +0100|Fix bug
+m1n2o3p|Jane Smith|jane@example.com|2024-01-16 16:45:00 +0100|Update documentation
+q4r5s6t|John Doe|john@example.com|2024-01-17 11:00:00 +0100|Refactor code`;
                 setGitLog(example);
               }}
               className="text-purple-400 hover:text-purple-300 underline transition-colors"

@@ -5,6 +5,8 @@ interface GitHubCommit {
   commit: {
     message: string;
     author: {
+      name: string;
+      email: string;
       date: string;
     };
   };
@@ -48,57 +50,70 @@ export async function POST(request: NextRequest) {
       repo = parts[1];
     }
 
-    // Fetch commits depuis GitHub API (publique, pas besoin d'auth pour repos publics)
-    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/commits?per_page=100`;
-    
-    const response = await fetch(apiUrl, {
-      headers: {
-        'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'Code-Roast-Wrapped',
-      },
-    });
+    // Fetch ALL commits depuis GitHub API (publique)
+    // On va paginer pour avoir tous les commits
+    const allCommits: GitHubCommit[] = [];
+    let page = 1;
+    let hasMore = true;
 
-    if (!response.ok) {
-      if (response.status === 404) {
-        return NextResponse.json(
-          { error: 'Repo introuvable ou privé' },
-          { status: 404 }
-        );
+    while (hasMore && page <= 10) { // Limite à 10 pages (1000 commits) pour éviter timeout
+      const apiUrl = `https://api.github.com/repos/${owner}/${repo}/commits?per_page=100&page=${page}`;
+
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'Project-Analytics',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          return NextResponse.json(
+            { error: 'Repo introuvable ou privé' },
+            { status: 404 }
+          );
+        }
+        if (response.status === 403) {
+          return NextResponse.json(
+            { error: 'Rate limit GitHub atteint. Réessaie plus tard.' },
+            { status: 403 }
+          );
+        }
+        throw new Error(`GitHub API error: ${response.status}`);
       }
-      if (response.status === 403) {
-        return NextResponse.json(
-          { error: 'Rate limit GitHub atteint. Réessaie plus tard.' },
-          { status: 403 }
-        );
+
+      const commits: GitHubCommit[] = await response.json();
+
+      if (commits.length === 0) {
+        hasMore = false;
+      } else {
+        allCommits.push(...commits);
+        page++;
       }
-      throw new Error(`GitHub API error: ${response.status}`);
     }
 
-    const commits: GitHubCommit[] = await response.json();
-
-    if (commits.length === 0) {
+    if (allCommits.length === 0) {
       return NextResponse.json(
         { error: 'Aucun commit trouvé' },
         { status: 404 }
       );
     }
 
-    // Convertir au format git log avec heure pour meilleure analyse
-    const gitLogLines = commits.map((commit) => {
-      const date = new Date(commit.commit.author.date);
-      const dateStr = date.toISOString().split('T')[0];
-      const hour = date.getHours();
-      const message = commit.commit.message.split('\n')[0]; // Première ligne seulement
+    // Convertir au format avancé: hash|author|email|date|message
+    const gitLogLines = allCommits.map((commit) => {
       const hash = commit.sha.substring(0, 7);
-      
-      // Format: hash date hour message (pour parser amélioré)
-      return `${hash} ${dateStr} ${hour} ${message}`;
+      const author = commit.commit.author.name;
+      const email = commit.commit.author.email;
+      const date = commit.commit.author.date; // Format ISO
+      const message = commit.commit.message.split('\n')[0].replace(/\|/g, ' '); // Première ligne, remove pipes
+
+      return `${hash}|${author}|${email}|${date}|${message}`;
     });
 
     return NextResponse.json({
       gitLog: gitLogLines.join('\n'),
       repo: `${owner}/${repo}`,
-      totalCommits: commits.length,
+      totalCommits: allCommits.length,
     });
   } catch (error) {
     console.error('GitHub API error:', error);
@@ -108,3 +123,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
